@@ -1,10 +1,10 @@
 #####################################################
 #                                                   #
-#               Nome: Domingos José Pereira Paraiso #
-#          Matrícula: 20221mpca0051                 #
+#               Nome: Márcio Clay Castelo Branco    #
+#          Matrícula: 20261mpca0127                 #
 # Título do trabalho: Trabalho de Sockets           #
-#               Data: 24/04/2022                    #
-#                Ano: 2022                          #
+#               Data: 09/09/2026                    #
+#                Ano: 2029                          #
 #         Disciplina: Redes de Computadores PPComp  #
 #                                                   #
 #####################################################
@@ -43,6 +43,8 @@ NUM_SENSOR_PRESENCA = 2
 COD_SENSOR_PRESENCA = 'S'
 NUM_TERMOMETRO = 3
 COD_TERMOMETRO = 'T'
+NUM_AR_CONDICIONADO = 4
+COD_AR_CONDICIONADO = 'A'
 
 # Códigos das mensagens
 MSG_NULL = 0
@@ -59,6 +61,8 @@ SM_INICIALIZANDO = 1
 SM_SELECIONA_AMBIENTE = 2
 SM_CONECTADO_SENSOR = 3
 SM_CONECTADO_LAMPADA = 4
+AR_DESLIGADO = 0
+AR_LIGADO = 1
 
 # Comandos para fazer manutenção da lista de lâmpadas conectadas
 INCLUIR_LAMPADA = 1
