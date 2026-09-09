@@ -1,9 +1,8 @@
 #####################################################
-#                                                   #
-# Título do trabalho: Trabalho de Sockets           #
-# Disciplina: Redes de Computadores PPComp          #
-# Módulo: Cliente Ar-Condicionado Inteligente      #
-#                                                   #
+#													#
+# Título do trabalho: Trabalho de Sockets			#
+#		  Disciplina: Redes de Computadores PPComp	#
+#													#
 #####################################################
 
 from Config import *
@@ -13,8 +12,11 @@ import socket
 
 deviceID = None
 
+####################
+# Inicializando... #
+####################
 if __name__ == '__main__':
-    print('Inicializando cliente: Ar-Condicionado Inteligente...')
+    print('Inicializando cliente: Ar-Condicionado...')
     try:
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         destination = (SERVIDOR, PORTA)
@@ -22,34 +24,31 @@ if __name__ == '__main__':
     except:
         print(f'Falha ao tentar se conectar com o servidor {SERVIDOR} porta {PORTA}')
         exit()
-
     device = Device(connection, NUM_AR_CONDICIONADO)
     roomDict = ClientRegister(device)
-    
-    if roomDict is not None:
+    if roomDict != None:
         deviceID, roomID, roomName = SelectRoom(device, roomDict)
-        if deviceID is not None:
-            while True:
-                print(f'\n==> Ambiente [{roomID}] {roomName}')
-                print('Aguardando comandos de climatização do servidor...')
-                msg = ReceiveMessage(connection, device)
-                
-                if msg is not None and msg.code in (MSG_LAMPADA, MSG_ATUADOR):
-                    print('Comando de climatização recebido do servidor!')
-                    print('#####################################')
-                    if msg.action == AR_LIGADO:
-                        print('        AR-CONDICIONADO LIGADO [REFRIGERANDO]')
-                    elif msg.action == AR_DESLIGADO:
-                        print('        AR-CONDICIONADO DESLIGADO')
-                    else:
-                        print(f'Ação inválida: {msg.action}')
-                    print('#####################################')
-                    
-                    # Confirma a execução para o servidor
-                    msg_resp = MessageStatus()
-                    connection.send(msg_resp.pack(deviceID, ACAO_EXECUTADA))
-                else:
-                    print('Mensagem inválida ou desconexão.')
-                    break
 
+        # Evita exibição de caracteres nulos \x00
+        roomNameClean = roomName.replace('\x00', '').strip() if roomName else ""
+
+        if deviceID != None:
+            while True:
+                print(f'\n==> Ambiente [{roomID}] {roomNameClean}')
+                msg = ReceiveMessage(connection, device)
+
+                if (msg.code == MSG_LAMPADA):
+                    print('Acionamento recebido do servidor!!!')
+                    print('#####################################')
+                    if msg.action == 23:
+                        print('      AR-CONDICIONADO: SET 23°C')
+                    elif msg.action == 0:
+                        print('      AR-CONDICIONADO: DESLIGADO')
+                    else:
+                        print(f'      Ação recebida: {msg.action}')
+                    print('#####################################')
+                    msg = MessageStatus()
+                    connection.send(msg.pack(deviceID, ACAO_EXECUTADA))
+                else:
+                    print('Mensagem inválida code:', msg.code)
         connection.close()
