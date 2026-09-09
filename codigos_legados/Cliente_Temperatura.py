@@ -16,7 +16,7 @@ deviceID = None
 # Inicializando... #
 ####################
 if __name__ == '__main__':
-	print('Inicializando cliente: Sensor de Presença...')
+	print('Inicializando cliente: Sensor de Temperatura...')
 	try:
 		connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		destination = (SERVIDOR, PORTA)
