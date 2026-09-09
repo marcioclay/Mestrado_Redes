@@ -1,10 +1,10 @@
 #####################################################
 #                                                   #
-#               Nome: Márcio Clay Castelo Branco    #
-#          Matrícula: 20261mpca0127                 #
+#               Nome: Domingos José Pereira Paraiso #
+#          Matrícula: 20221mpca0051                 #
 # Título do trabalho: Trabalho de Sockets           #
-#               Data: 09/09/2026                    #
-#                Ano: 2029                          #
+#               Data: 24/04/2022                    #
+#                Ano: 2022                          #
 #         Disciplina: Redes de Computadores PPComp  #
 #                                                   #
 #####################################################
@@ -61,8 +61,6 @@ SM_INICIALIZANDO = 1
 SM_SELECIONA_AMBIENTE = 2
 SM_CONECTADO_SENSOR = 3
 SM_CONECTADO_LAMPADA = 4
-AR_DESLIGADO = 0
-AR_LIGADO = 1
 
 # Comandos para fazer manutenção da lista de lâmpadas conectadas
 INCLUIR_LAMPADA = 1
