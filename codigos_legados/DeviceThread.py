@@ -77,7 +77,7 @@ def WorkSelectRoom(device, msg, controlQueue):
        msg = MessageStatus()
        SendMessage(device, msg.pack(device.ID, DISPOSITIVO_REGISTRADO))
        # Próximo estado, dispositivo conectado
-       if device.typeCode == COD_LAMPADA:
+       if device.typeCode in (COD_LAMPADA, COD_AR_CONDICIONADO):
           device.lampQueue = queue.Queue()
           print('Enviando mensagem de nova lâmpada para a fila do controle')
           controlQueue.put(MonitorItem(device.ID, device.typeCode, device.roomID, INCLUIR_LAMPADA, device.lampQueue))
