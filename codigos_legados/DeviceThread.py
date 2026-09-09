@@ -131,18 +131,28 @@ def WorkLamp(device, msg):
 
 def WorkSensor(device, msg, controlQueue):
     if msg.deviceID != device.ID:
-       # ID do dispositivo enviado não é o mesmo que foi registrado
-       msg = MessageStatus()
-       SendMessage(device, msg.pack(device.ID, ERRO_ID_DE_DISPOSITIVO_INVALIDO))
-       print(f'{device.toString()}: Cliente com ID inválido, esperava {device.ID}, recebi {msg.deviceID}')
-       return SM_DESCONECTAR
+        # ID do dispositivo enviado não é o mesmo que foi registrado
+        msg = MessageStatus()
+        SendMessage(device, msg.pack(device.ID, ERRO_ID_DE_DISPOSITIVO_INVALIDO))
+        print(f'{device.toString()}: Cliente com ID inválido, esperava {device.ID}, recebi {msg.deviceID}')
+        return SM_DESCONECTAR
+
     # Atualizando os valores recebidos
     device.value = msg.value
-    print(device.toString() + ': VALOR LIDO DO SENSOR =', msg.value)
-    # Se um sensor de presença foi acionado, informar ao controle
+    print(f'{device.toString()}: VALOR LIDO DO SENSOR = {msg.value}')
+
+    # Se for um sensor de presença, encaminha o estado (0 ou 1)
     if device.typeCode == COD_SENSOR_PRESENCA:
-       print('Enviando mensagem do sensor para a fila do controle')
-       controlQueue.put(MonitorItem(device.ID, device.typeCode, device.roomID, device.value, None))
+        print('Enviando mensagem do sensor de presença para a fila do controle')
+        controlQueue.put(MonitorItem(device.ID, device.typeCode, device.roomID, device.value, None))
+
+    # Regra de Automação para o Termômetro:
+    # Se a temperatura for >= 25.0°C, liga o Ar-Condicionado (1). Caso contrário, desliga (0).
+    elif device.typeCode == COD_TERMOMETRO:
+        acao_ar = AR_LIGADO if device.value >= 25.0 else AR_DESLIGADO
+        print(f'Automação Climatização: Temp={device.value}°C -> Comando Ar={acao_ar}')
+        controlQueue.put(MonitorItem(device.ID, device.typeCode, device.roomID, acao_ar, None))
+
     # Informando que a leitura foi recebida
     msg = MessageStatus()
     SendMessage(device, msg.pack(device.ID, LEITURA_RECEBIDA))
