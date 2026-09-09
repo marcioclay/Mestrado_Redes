@@ -1,4 +1,4 @@
-## Os dados abaixo são as modificações no código, devido alguns erros encontrados e incremento inclusão de ar-condicionado.
+## Os dados abaixo são as modificações no código, devido alguns erros encontrados e inclusão de ar-condicionado.
 
 
 ## Erro 1: Rótulo Incorreto no Termômetro
