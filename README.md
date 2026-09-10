@@ -1,5 +1,11 @@
 # Mestrado de Computação Aplicada
 
+![Mestrado](https://img.shields.io/badge/Mestrado-PPComp-8A2BE2?style=for-the-badge)
+![Redes](https://img.shields.io/badge/Redes_de_Computadores-Ifes-4CAF50?style=for-the-badge)
+![Sockets](https://img.shields.io/badge/Sockets-Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![TCP](https://img.shields.io/badge/TCP-Protocol-FF6600?style=for-the-badge)
+![Protocolo](https://img.shields.io/badge/Protocolo-Custom-007EC6?style=for-the-badge)
+
 
 Repositório acadêmico desenvolvido para a disciplina de **Redes de Computadores** (PPComp / Ifes), focado na documentação, correção de falhas  e expansão de um sistema cliente-servidor baseado em sockets TCP.
 
@@ -17,8 +23,6 @@ Repositório acadêmico desenvolvido para a disciplina de **Redes de Computadore
   * [4.3. Simulando Mudanças via Teclado (Console)](#43-simulando-mudanças-via-teclado-console)
   * [4.4. Teste de Falha: Dispositivo Não Suportado](#44-teste-de-falha-dispositivo-não-suportado)
 * [5. Análise Crítica e Melhorias Implementadas](#5-análise-crítica-e-melhorias-implementadas)
-
----
 
 ---
 
@@ -248,7 +252,20 @@ O servidor possui um mecanismo de defesa caso um dispositivo tente se conectar c
 
 
 ---
-5. Análise Crítica e Melhorias Implementadas
-Correção de Bugs Legados: Correção de exceções do tipo NameError em funções de envio e padronização do tratamento de f-strings.
+## 5. Análise Crítica e Melhorias Implementadas
 
-Desacoplamento de Atuadores: Ampliação da máquina de estados para suportar múltiplos atuadores além da lâmpada tradicional, permitindo a integração fluida do Ar-Condicionado sem quebrar o protocolo base.
+Durante a apropriação e extensão deste sistema legado de *Smart Home*, foi possível identificar oportunidades de correção e melhorias arquiteturais, bem como apontar limitações que podem ser abordadas em versões futuras.
+
+### 5.1. Correções Realizadas no Código Original (Bugs Fixes)
+* **Correção de Chamada de Função (`NameError`):** No arquivo original `DeviceThread.py`, o tratamento de erros (como em cenários de ID de dispositivo inválido ou ambiente incorreto) tentava chamar a função `sendMessage()` com a letra "s" minúscula[cite: 9]. Isso gerava uma exceção que travava a thread do servidor e desconectava o cliente abruptamente. O código foi corrigido para a chamada correta `SendMessage()`.
+* **Tratamento do Valor Inicial do Atuador:** O estado inicial dos dispositivos (`device.value`) foi reajustado. Na versão original, um atuador inicializado com valor `0` poderia ignorar um primeiro comando de desligamento (valor `0`) oriundo da fila devido a uma checagem de diferença de estado.
+
+### 5.2. Melhorias na Extensão do Sistema (Ar-Condicionado)
+* **Escalabilidade via Reaproveitamento de Filas:** Para integrar o Ar-Condicionado inteligente sem quebrar ou precisar reescrever a complexa Thread de Controle Geral (`GeneralControl.py`), o novo dispositivo utilizou a infraestrutura de filas dos atuadores originais. O Ar-Condicionado entra no dicionário de filas sendo roteado de forma transparente, provando a robustez da arquitetura orientada a mensagens assíncronas (`queue.Queue`).
+* **Automação Desacoplada:** A regra de negócio ($\ge 26^\circ\text{C}$ dispara $23^\circ\text{C}$) não bloqueia a comunicação da rede. A lógica foi embutida no recebimento da leitura do termômetro, injetando o comando na Fila Central para que a *Thread* de Controle Geral faça o roteamento até o atuador correspondente no mesmo cômodo.
+
+### 5.3. Análise Crítica e Trabalhos Futuros (Limitações)
+Embora funcional, o sistema apresenta pontos de melhoria importantes considerando o contexto de IoT (*Internet of Things*):
+1. **Regras de Automação Estáticas (*Hardcoded*):** A condição térmica para ativar o ar-condicionado está escrita diretamente no código da thread. Um aprimoramento ideal seria criar um motor de regras lendo um arquivo de configuração (ex: JSON ou XML), permitindo que o usuário altere gatilhos sem precisar recompilar ou reiniciar o servidor.
+2. **Segurança de Rede:** A comunicação ocorre via *sockets* TCP sem criptografia (texto claro empacotado em bytes). Em um ambiente de rede real, um atacante na mesma rede Wi-Fi poderia facilmente interceptar os pacotes ou injetar comandos falsos. A implementação de **TLS/SSL** seria necessária para segurança.
+3. **Persistência de Dados e Histórico:** Conforme sugerido nos comentários internos do próprio código base original, as leituras dos sensores são atualmente voláteis[cite: 9]. Integrar um banco de dados leve (como SQLite) para persistir o histórico de acionamentos e leituras é um passo essencial para transformar este protótipo em uma solução comercial.
