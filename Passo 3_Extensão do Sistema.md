@@ -33,4 +33,4 @@ do dispositivo.
 - Linha 121: Chamada sendMessage(...) com "s" minúsculo (NameError).
 - Linha 122: Falta o f antes das aspas no print (imprime {device.ID} e {msg.deviceID} como texto).
 
-  
+## Construção do atuador ar condicionado, commit e código no repositório de códigos  
