@@ -3,6 +3,23 @@
 
 Repositório acadêmico desenvolvido para a disciplina de **Redes de Computadores** (PPComp / Ifes), focado na documentação, correção de falhas  e expansão de um sistema cliente-servidor baseado em sockets TCP.
 
+## Índice
+
+* [1. Fundamentos de Sockets TCP e Tratamento de Buffer](#1-fundamentos-de-sockets-tcp-e-tratamento-de-buffer)
+* [2. Arquitetura e Diagramas de Fluxo](#2-arquitetura-e-diagramas-de-fluxo)
+  * [2.1. Visão Geral das Threads](#21-visão-geral-das-threads)
+  * [2.2. Fluxo de Inicialização e Registro de Clientes](#22-fluxo-de-inicialização-e-registro-de-clientes)
+  * [2.3. Fluxo de Comunicação via Filas (Queues)](#23-fluxo-de-comunicação-via-filas-queues)
+* [3. O Protocolo de Comunicação](#3-o-protocolo-de-comunicação)
+* [4. Roteiro Detalhado de Testes](#4-roteiro-detalhado-de-testes)
+  * [4.1. Inicializando o Servidor](#41-inicializando-o-servidor)
+  * [4.2. Registro e Validação de Dispositivos (Cenário de Sucesso)](#42-registro-e-validação-de-dispositivos-cenário-de-sucesso)
+  * [4.3. Simulando Mudanças via Teclado (Console)](#43-simulando-mudanças-via-teclado-console)
+  * [4.4. Teste de Falha: Dispositivo Não Suportado](#44-teste-de-falha-dispositivo-não-suportado)
+* [5. Análise Crítica e Melhorias Implementadas](#5-análise-crítica-e-melhorias-implementadas)
+
+---
+
 ---
 
 ## 1. Fundamentos de Sockets TCP e Tratamento de Buffer
