@@ -1,8 +1,16 @@
 #####################################################
+<<<<<<< HEAD
+#                                                   #
+# Título do trabalho: Trabalho de Sockets           #
+# Disciplina: Redes de Computadores PPComp 2026     #
+# Módulo: Cliente Ar-Condicionado Inteligente       #
+#                                                   #
+=======
 #													#
 # Título do trabalho: Trabalho de Sockets			#
 #		  Disciplina: Redes de Computadores PPComp	#
 #													#
+>>>>>>> 2889c31914bb79de38b657edc64e93e35324afad
 #####################################################
 
 from Config import *
