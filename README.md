@@ -1,5 +1,6 @@
 # Mestrado de Computação Aplicada
 
+
 Repositório acadêmico desenvolvido para a disciplina de **Redes de Computadores** (PPComp / Ifes), focado na documentação, correção de falhas  e expansão de um sistema cliente-servidor baseado em sockets TCP.
 
 ---
@@ -113,26 +114,52 @@ sequenceDiagram
     A-->>Cliente Ar-Condicionado: Envia TCP: Acionar 23°C
 ```
 
+
 * Dinâmica das Filas: Como o Termômetro e o Ar-Condicionado rodam em threads separadas, eles não "conversam" diretamente. O Termômetro coloca a informação na Fila Central. A Thread de Controle retira essa informação, procura quais atuadores estão no mesmo ambiente e coloca o comando na Fila Privativa do Atuador.
 
 ---
 
 ## 3. O Protocolo de Comunicação
 
-O protocolo de aplicação define a estrutura binária e o sequenciamento das mensagens trocadas entre clientes e servidor[cite: 32]. Cada mensagem possui campos com tamanhos múltiplos de 1 byte[cite: 32]:
-* **Código da Mensagem (1 byte):** Identifica a operação (ex: Registro, Listagem, Seleção, Envio de Sensor, Acionamento).
-* **Data e Hora:** Carimbo temporal para registro de logs e histórico.
-* **ID do Dispositivo:** Identificador único atribuído pelo servidor após o registro no ambiente.
+O sistema utiliza um protocolo de aplicação customizado sobre o TCP. Para evitar problemas de fragmentação de pacotes na rede, o protocolo estabelece um formato fixo para as mensagens, garantindo que o servidor e os clientes saibam exatamente como extrair as informações do buffer TCP.
 
-### Tabela de Códigos de Mensagens
-| Código | Tipo / Função | Descrição |
-| :--- | :--- | :--- |
-| `2` | `MSG_REGISTRO` | Enviado pelo cliente informando seu tipo ao conectar. |
-| `3` | `MSG_LISTA_AMBIENTES` | Servidor envia o dicionário de cômodos disponíveis. |
-| `4` | `MSG_SELECIONA_AMBIENTE` | Cliente informa o ID do cômodo onde está instalado. |
-| `5` | `MSG_SENSOR` | Envio de leituras contínuas (temperatura ou presença). |
-| `6` | `MSG_LAMPADA` / Atuador | Comando de acionamento enviado pelo servidor ao atuador. |
+### Formato Fixo das Mensagens (Estrutura de Bytes)
+Todas as mensagens trocadas seguem uma estrutura binária empacotada, onde a ordem dos campos e seus tamanhos são organizados em múltiplos de 1 byte. O cabeçalho padrão de todas as mensagens obedece à seguinte ordem obrigatória:
 
+1. **Código da Mensagem (1 byte):** Inteiro que identifica o tipo de operação (ex: 2 para Registro, 6 para Acionamento)[cite: 22].
+2. **Data e Hora da Mensagem (Timestamp):** Carimbo temporal gerado no momento do empacotamento, utilizado para logs e ordenação de eventos históricos[cite: 22].
+3. **ID do Dispositivo (Inteiro):** Identificador único, numérico e sequencial. É preenchido com `0` antes do registro e assume o valor definitivo após a atribuição pelo servidor[cite: 22].
+4. **Carga Útil (*Payload* - Variável):** O restante dos bytes carrega a informação específica daquela mensagem (ex: o valor lido por um sensor ou o comando para uma lâmpada).
+
+---
+
+### Ordem de Envio e Exemplos Práticos de Comunicação
+
+A comunicação obedece a um sequenciamento de requisição e resposta. Abaixo detalhamos as duas fases principais do ciclo de vida de um dispositivo e o que exatamente o código envia pela rede:
+
+#### Fase 1: Handshake e Registro do Dispositivo
+Sempre que um novo cliente se conecta (ex: Ar-Condicionado), a seguinte sequência de mensagens ocorre obrigatoriamente:
+1. **Cliente `->` Servidor:** Envia `MSG_REGISTRO` (Código `2`) + O caractere do seu tipo (ex: `'A'` para Ar-Condicionado).
+2. **Servidor `->` Cliente:** Valida o tipo e responde com `MSG_LISTA_AMBIENTES` (Código `3`) + O dicionário de cômodos lido do arquivo `ambientes.txt`.
+3. **Cliente `->` Servidor:** O usuário digita o ambiente no console, e o cliente envia `MSG_SELECIONA_AMBIENTE` (Código `4`) + ID do ambiente (ex: `1` para Sala).
+4. **Servidor `->` Cliente:** Cadastra o dispositivo na memória, gera seu ID único (ex: ID `3`) e responde com `MSG_STATUS` (Código `1`) informando `DISPOSITIVO_REGISTRADO`.
+
+#### Fase 2: Operação Contínua (Exemplos de Ações)
+
+* **Exemplo A: Acendendo uma Lâmpada (Comando do Servidor)**
+  * **Servidor envia:** `MSG_LAMPADA` (Código `6`) contendo a **Ação `1`** (Ligar).
+  * **Cliente Lâmpada recebe:** Processa a ação, imprime na tela `LAMPADA LIGADA` e retorna a confirmação.
+  * **Cliente responde:** `MSG_STATUS` (Código `1`) contendo o status **`3`** (`ACAO_EXECUTADA`).
+
+* **Exemplo B: Climatização do Ar-Condicionado (Comando do Servidor)**
+  * **Servidor envia:** `MSG_LAMPADA` (Código `6`) contendo a **Ação `23`**.
+  * **Cliente Ar-Condicionado recebe:** Ajusta a temperatura na tela para `SET 23°C` e retorna a confirmação.
+  * **Cliente responde:** `MSG_STATUS` (Código `1`) contendo o status **`3`** (`ACAO_EXECUTADA`).
+
+* **Exemplo C: Envio de Leitura de Temperatura (Comando do Cliente)**
+  * **Cliente Termômetro envia:** `MSG_SENSOR` (Código `5`) contendo o valor numérico lido **`26.0`**.
+  * **Servidor recebe:** Processa a automação térmica na fila e devolve o recibo.
+  * **Servidor responde:** `MSG_STATUS` (Código `1`) contendo o status **`2`** (`LEITURA_RECEBIDA`).
 ---
 
 ## 4. Roteiro Detalhado de Testes
