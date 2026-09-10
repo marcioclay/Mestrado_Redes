@@ -161,45 +161,76 @@ Sempre que um novo cliente se conecta (ex: Ar-Condicionado), a seguinte sequênc
   * **Servidor recebe:** Processa a automação térmica na fila e devolve o recibo.
   * **Servidor responde:** `MSG_STATUS` (Código `1`) contendo o status **`2`** (`LEITURA_RECEBIDA`).
 ---
-
 ## 4. Roteiro Detalhado de Testes
 
-### Inicialização do Servidor
-1. Abra o terminal na raiz do projeto e execute:
-```
-   python Server.py
-```
-O terminal exibirá a mensagem de inicialização da Thread de Controle Geral e o socket aguardando conexões na porta 5000. 
+Para validar a arquitetura Cliente/Servidor, a troca de mensagens TCP e as regras de negócio de automação residencial, siga o roteiro de testes abaixo. É necessário abrir múltiplos terminais simultaneamente.
 
-2. Testando a Extensão (Ar-Condicionado) 
+### 4.1. Inicializando o Servidor
+O servidor atua como a central inteligente da casa e deve ser o primeiro a ser iniciado[cite: 22]. 
 
-- Conexão do Atuador: Em um novo terminal, inicie o cliente do novo dispositivo:
-```
- Cliente_ArCondicionado.py
-```
+1. Abra um terminal na pasta raiz do projeto.
+2. Execute o comando de inicialização: `python Server.py`
+3. **Observação de Logs:** O terminal do servidor exibirá a mensagem informando que a Thread de Controle Geral foi iniciada e que o sistema está aguardando conexões na porta 5000.
 
-* O cliente se conecta, envia o tipo 4 (Ar-Condicionado), recebe a lista de cômodos do ambientes.txt e solicita a seleção.
-  Digite 1 (Sala).
+> 📸 **[COLOQUE AQUI O PRINTSCREEN DO SERVIDOR INICIADO E AGUARDANDO CONEXÕES]**
+
+---
+
+### 4.2. Registro e Validação de Dispositivos (Cenário de Sucesso)
+Ao conectar, o dispositivo informa seu tipo, o servidor valida, solicita o ambiente e gera um ID para a comunicação[cite: 22]. Faremos o teste com o novo dispositivo de Ar-Condicionado.
+
+1. Em um **segundo terminal**, execute o cliente do Ar-Condicionado: `python Cliente_ArCondicionado.py`
+2. **Processo de Registro:**
+   * O cliente envia seu código de tipo ao servidor.
+   * O servidor valida o tipo e envia de volta a lista de ambientes disponível no arquivo `ambientes.txt`[cite: 22].
+   * No terminal do cliente, aparecerá a solicitação: `ID do ambiente: `.
+3. Digite `1` (referente à Sala) e pressione Enter.
+4. **Observação de Logs (Servidor):** Verifique no terminal do servidor a impressão dos logs obrigatórios confirmando o registro:
+   * `Dispositivo do tipo Ar-Condicionado (A) registrado`
+   * `Ambiente selecionado = [1] Sala`
+
+> 📸 **[COLOQUE AQUI O PRINTSCREEN MOSTRANDO O CLIENTE SELECIONANDO A SALA E O LOG DO SERVIDOR CONFIRMANDO]**
+
+---
+
+### 4.3. Simulando Mudanças via Teclado (Console)
+Os sensores simulam a interação do mundo físico capturando dados do teclado e enviando pacotes TCP contínuos ao servidor[cite: 22].
+
+#### A) Sensor de Presença (Valores 0 e 1)
+1. Em um **terceiro terminal**, inicie o Sensor de Presença e registre-o no ambiente `1` (Sala)[cite: 14]: `python Cliente_Presenca.py`
+2. O terminal exibirá o menu de simulação:
+   * `0) para indicar que o sensor não detectou ninguém`[cite: 14]
+   * `1) para indicar uma presença detectada`[cite: 14]
+3. Digite `1` e pressione Enter.
+4. **Observação de Logs:** 
+   * **No Cliente:** O terminal informará o envio da mensagem e aguardará a confirmação. Em seguida, exibirá `Leitura recebida pelo servidor!!!`[cite: 14].
+   * **No Servidor:** O terminal imprimirá a recepção do dado `VALOR LIDO DO SENSOR = 1`, repassando o comando pela fila para acender a Lâmpada[cite: 20].
+
+#### B) Sensor de Temperatura (Regra de Climatização)
+1. Em um **quarto terminal**, inicie o Termômetro e registre-o na Sala (ID `1`)[cite: 15]: `python Cliente_Temperatura.py`
+2. O terminal solicitará: `Temperatura lida no sensor: `[cite: 15]. Digite `26.0` e pressione Enter.
+3. **Observação de Logs da Automação (Servidor e Ar-Condicionado):**
+   * O servidor registrará o recebimento e ativará a regra lógica: `Temperatura >= 26. Reduzindo Ar-Condicionado para 23.`[cite: 20]
+   * Repare no terminal do **Ar-Condicionado** (aberto no passo 4.2). Ele receberá a mensagem instantaneamente do servidor e exibirá na tela o acionamento: `AR-CONDICIONADO: SET 23°C`.
+
+> 📸 **[COLOQUE AQUI O PRINTSCREEN DO CONSOLE DO SENSOR DE TEMPERATURA (ENVIANDO 26.0) E DO AR-CONDICIONADO (RECEBENDO SET 23°C)]**
+
+---
+
+### 4.4. Teste de Falha: Dispositivo Não Suportado
+O servidor possui um mecanismo de defesa caso um dispositivo tente se conectar com um código não cadastrado no arquivo `dispositivos.txt`[cite: 21, 22]. 
+
+* **Como simular:** Altere temporariamente o código fonte de um cliente (ex: `Cliente_Lampada.py`) mudando a constante de inicialização para um número inexistente, como `99` (ex: `device = Device(connection, 99)`).
+* **Comportamento Esperado:**
+  1. Ao iniciar este cliente adulterado, ele envia a solicitação de registro.
+  2. O servidor consulta o dicionário de tipos (`GetTypeItem`) e não encontra a chave `99`.
+  3. O servidor responde com o código de erro `ERRO_DISPOSITIVO_NAO_SUPORTADO` (código 5)[cite: 20].
+  4. **Observação de Logs (Servidor):** O servidor imprime no terminal: `Dispositivo não suportado código=(99)` e encerra a conexão do socket imediatamente de forma segura, retornando ao estado de Desconectar (`SM_DESCONECTAR`)[cite: 20, 22].
+
+> 📸 **[COLOQUE AQUI O PRINTSCREEN DO LOG DO SERVIDOR REJEITANDO A CONEXÃO COM A MENSAGEM DE 'DISPOSITIVO NÃO SUPORTADO']**
 
 
-- Conexão do Sensor de Temperatura: Em outro terminal, inicie o termômetro:
-  
-```
-Cliente_Temperatura.py
-``` 
-
-  Selecione o ambiente 1 (Sala).
-
-Disparando a Regra de Automação:No terminal do termômetro, digite uma temperatura $\ge 26.0$ (ex: 26.0).  
-Resultado esperado: O servidor processa a leitura, identifica o gatilho da regra e envia o comando de setpoint 23. 
-O terminal do Ar-Condicionado exibirá imediatamente:
-```
-AR-CONDICIONADO: SET 23°C
-```
-
-Tratamento de Erros (Dispositivo Não Suportado)
-Se um cliente desconhecido tentar se conectar enviando um código de tipo inválido não mapeado no dispositivos.txt, o servidor intercepta a falha na função WorkStart, registra o erro ERRO_DISPOSITIVO_NO_SUPORTADO (código 5), exibe o log de rejeição no terminal e encerra a conexão do socket com segurança.
-
+---
 5. Análise Crítica e Melhorias Implementadas
 Correção de Bugs Legados: Correção de exceções do tipo NameError em funções de envio e padronização do tratamento de f-strings.
 
