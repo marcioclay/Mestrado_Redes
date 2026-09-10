@@ -15,7 +15,7 @@ Repositório acadêmico desenvolvido para a disciplina de **Redes de Computadore
 * [2. Arquitetura e Diagramas de Fluxo](#2-arquitetura-e-diagramas-de-fluxo)
   * [2.1. Visão Geral das Threads](#21-visão-geral-das-threads)
   * [2.2. Fluxo de Inicialização e Registro de Clientes](#22-fluxo-de-inicialização-e-registro-de-clientes)
-  * [2.3. Fluxo de Comunicação via Filas (Queues)](#23-fluxo-de-comunicação-via-filas-queues)
+  * [2.3. Fluxo de Comunicação via Filas (Queues)](#23-fluxo-de-comunicação-via-filas)
 * [3. O Protocolo de Comunicação](#3-o-protocolo-de-comunicação)
 * [4. Roteiro Detalhado de Testes](#4-roteiro-detalhado-de-testes)
   * [4.1. Inicializando o Servidor](#41-inicializando-o-servidor)
@@ -109,7 +109,7 @@ sequenceDiagram
     end
 ```
 
-2.3. Fluxo de Comunicação via Filas (Queues)
+2.3. Fluxo de Comunicação via Filas 
 O desacoplamento entre os sensores (que geram eventos) e os atuadores (que executam as ordens) é feito por meio de estruturas de filas thread-safe (queue.Queue), garantindo que não ocorram colisões de dados.
 
 O diagrama abaixo ilustra a extensão do sistema, onde o termômetro aciona o ar-condicionado utilizando filas:
