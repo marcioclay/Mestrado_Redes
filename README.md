@@ -4,7 +4,6 @@
 ![Redes](https://img.shields.io/badge/Redes_de_Computadores-Ifes-4CAF50?style=for-the-badge)
 ![Sockets](https://img.shields.io/badge/Sockets-Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![TCP](https://img.shields.io/badge/TCP-Protocol-FF6600?style=for-the-badge)
-![Protocolo](https://img.shields.io/badge/Protocolo-Custom-007EC6?style=for-the-badge)
 
 
 Repositório acadêmico desenvolvido para a disciplina de **Redes de Computadores** (PPComp / Ifes), focado na documentação, correção de falhas  e expansão de um sistema cliente-servidor baseado em sockets TCP.
