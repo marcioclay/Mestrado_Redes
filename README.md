@@ -7,6 +7,7 @@
 
 
 Repositório acadêmico desenvolvido para a disciplina de **Redes de Computadores** (PPComp / Ifes), focado na documentação, correção de falhas  e expansão de um sistema cliente-servidor baseado em sockets TCP.
+
 Profa. Dra Cristina Klippel Dominicini
 
 ## Índice
