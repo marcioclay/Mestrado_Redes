@@ -184,56 +184,86 @@ Sempre que um novo cliente se conecta (ex: Ar-Condicionado), a seguinte sequênc
 ## 4. Roteiro Detalhado de Testes
 
 Para validar a arquitetura Cliente/Servidor, a troca de mensagens TCP e as regras de negócio de automação residencial, siga o roteiro de testes abaixo. É necessário abrir múltiplos terminais simultaneamente.
+OOs comandos exibidos são de um terminal linux, mas o sistema pode ser executado de qualquer IDE.
 
 ### 4.1. Inicializando o Servidor
-O servidor atua como a central inteligente da casa e deve ser o primeiro a ser iniciado[cite: 22]. 
+O servidor atua como a central inteligente da casa e deve ser o primeiro a ser iniciado. 
 
-1. Abra um terminal na pasta raiz do projeto.
+1. Abra um terminal.
 2. Execute o comando de inicialização: `python Server.py`
 3. **Observação de Logs:** O terminal do servidor exibirá a mensagem informando que a Thread de Controle Geral foi iniciada e que o sistema está aguardando conexões na porta 5000.
+4. A Lista de dispositivos e ambiente é exibida.
 
-> 📸 **[COLOQUE AQUI O PRINTSCREEN DO SERVIDOR INICIADO E AGUARDANDO CONEXÕES]**
+<img width="806" height="342" alt="image" src="https://github.com/user-attachments/assets/cbf68fce-74df-40db-943e-0367a2554c71" />
 
 ---
 
 ### 4.2. Registro e Validação de Dispositivos (Cenário de Sucesso)
-Ao conectar, o dispositivo informa seu tipo, o servidor valida, solicita o ambiente e gera um ID para a comunicação[cite: 22]. Faremos o teste com o novo dispositivo de Ar-Condicionado.
+Ao conectar, o dispositivo informa seu tipo, o servidor valida, solicita o ambiente e gera um ID para a comunicação. 
+O teste será feito com o novo dispositivo de Ar-Condicionado.
 
 1. Em um **segundo terminal**, execute o cliente do Ar-Condicionado: `python Cliente_ArCondicionado.py`
 2. **Processo de Registro:**
    * O cliente envia seu código de tipo ao servidor.
-   * O servidor valida o tipo e envia de volta a lista de ambientes disponível no arquivo `ambientes.txt`[cite: 22].
+   * O servidor valida o tipo e envia de volta a lista de ambientes disponível no arquivo `ambientes.txt`.
    * No terminal do cliente, aparecerá a solicitação: `ID do ambiente: `.
 3. Digite `1` (referente à Sala) e pressione Enter.
 4. **Observação de Logs (Servidor):** Verifique no terminal do servidor a impressão dos logs obrigatórios confirmando o registro:
    * `Dispositivo do tipo Ar-Condicionado (A) registrado`
    * `Ambiente selecionado = [1] Sala`
+Log servidor:
+<img width="990" height="336" alt="image" src="https://github.com/user-attachments/assets/9ba3c2f8-f19c-43c0-8c94-ce9a34288201" />
 
-> 📸 **[COLOQUE AQUI O PRINTSCREEN MOSTRANDO O CLIENTE SELECIONANDO A SALA E O LOG DO SERVIDOR CONFIRMANDO]**
+Log cliente: 
+
+<img width="1146" height="421" alt="image" src="https://github.com/user-attachments/assets/37c1e8cb-551e-40da-acf2-539a142a10cc" />
+
+
 
 ---
 
 ### 4.3. Simulando Mudanças via Teclado (Console)
-Os sensores simulam a interação do mundo físico capturando dados do teclado e enviando pacotes TCP contínuos ao servidor[cite: 22].
+Os sensores simulam a interação do mundo físico capturando dados do teclado e enviando pacotes TCP contínuos ao servidor.
 
-#### A) Sensor de Presença (Valores 0 e 1)
-1. Em um **terceiro terminal**, inicie o Sensor de Presença e registre-o no ambiente `1` (Sala)[cite: 14]: `python Cliente_Presenca.py`
-2. O terminal exibirá o menu de simulação:
-   * `0) para indicar que o sensor não detectou ninguém`[cite: 14]
-   * `1) para indicar uma presença detectada`[cite: 14]
-3. Digite `1` e pressione Enter.
-4. **Observação de Logs:** 
-   * **No Cliente:** O terminal informará o envio da mensagem e aguardará a confirmação. Em seguida, exibirá `Leitura recebida pelo servidor!!!`[cite: 14].
-   * **No Servidor:** O terminal imprimirá a recepção do dado `VALOR LIDO DO SENSOR = 1`, repassando o comando pela fila para acender a Lâmpada[cite: 20].
-
-#### B) Sensor de Temperatura (Regra de Climatização)
-1. Em um **quarto terminal**, inicie o Termômetro e registre-o na Sala (ID `1`)[cite: 15]: `python Cliente_Temperatura.py`
-2. O terminal solicitará: `Temperatura lida no sensor: `[cite: 15]. Digite `26.0` e pressione Enter.
+#### Sensor de Temperatura (Regra de Climatização)
+1. Em um **terceiro terminal**, inicie o Termômetro e registre-o na Sala (ID `1`): `python Cliente_Temperatura.py`
+2. O terminal solicitará: `Temperatura lida no sensor: `. Digite `26.0` e pressione Enter.
 3. **Observação de Logs da Automação (Servidor e Ar-Condicionado):**
-   * O servidor registrará o recebimento e ativará a regra lógica: `Temperatura >= 26. Reduzindo Ar-Condicionado para 23.`[cite: 20]
+   * O servidor registrará o recebimento e ativará a regra lógica: `Temperatura >= 26. Reduzindo Ar-Condicionado para 23.`
    * Repare no terminal do **Ar-Condicionado** (aberto no passo 4.2). Ele receberá a mensagem instantaneamente do servidor e exibirá na tela o acionamento: `AR-CONDICIONADO: SET 23°C`.
 
-> 📸 **[COLOQUE AQUI O PRINTSCREEN DO CONSOLE DO SENSOR DE TEMPERATURA (ENVIANDO 26.0) E DO AR-CONDICIONADO (RECEBENDO SET 23°C)]**
+- sensor de temperatura
+   <img width="540" height="408" alt="image" src="https://github.com/user-attachments/assets/1d2b4b16-e50c-470f-b6cc-c0310b26494f" />
+```
+  Temperatura lida no sensor: 28
+Meu ID=2
+Enviando temperatura [09/10/2026, 22:05:22] 5: Leitura, Dispositivo: 2, Valor do sensor: 28.0
+Aguardando confirmação...
+>>> Aguardando mensagem
+>>> Decodificando mensagem...
+retornando mensagem codigo> 1
+Leitura recebida pelo servidor!!!
+```
+- Atuador ar condicionado
+
+  <img width="665" height="385" alt="image" src="https://github.com/user-attachments/assets/5e599a1c-9c38-4682-afa5-d770a6b4f918" />
+
+- servidor
+
+  ```
+  Ar-Condicionado1: Ar-condicionado SET 23 graus
+Enviando mensagem: >>> Aguardando mensagem 
+('127.0.0.1', 57845)
+>>> Aguardando mensagem
+>>> Decodificando mensagem...
+retornando mensagem codigo> 1
+Mensagem recebida:  ('127.0.0.1', 57845) [09/10/2026, 22:05:22] 1: Status, Dispositivo: 1, Status: [3] Ação executada
+Ar-Condicionado1: Ação executada.
+Aguardando evento, atuador 1  
+```
+
+
+
 
 ---
 
