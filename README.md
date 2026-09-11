@@ -146,9 +146,9 @@ O sistema utiliza um protocolo de aplicação customizado sobre o TCP. Para evit
 ### Formato Fixo das Mensagens (Estrutura de Bytes)
 Todas as mensagens trocadas seguem uma estrutura binária empacotada, onde a ordem dos campos e seus tamanhos são organizados em múltiplos de 1 byte. O cabeçalho padrão de todas as mensagens obedece à seguinte ordem obrigatória:
 
-1. **Código da Mensagem (1 byte):** Inteiro que identifica o tipo de operação (ex: 2 para Registro, 6 para Acionamento)[cite: 22].
-2. **Data e Hora da Mensagem (Timestamp):** Carimbo temporal gerado no momento do empacotamento, utilizado para logs e ordenação de eventos históricos[cite: 22].
-3. **ID do Dispositivo (Inteiro):** Identificador único, numérico e sequencial. É preenchido com `0` antes do registro e assume o valor definitivo após a atribuição pelo servidor[cite: 22].
+1. **Código da Mensagem (1 byte):** Inteiro que identifica o tipo de operação (ex: 2 para Registro, 6 para Acionamento).
+2. **Data e Hora da Mensagem (Timestamp):** Carimbo temporal gerado no momento do empacotamento, utilizado para logs e ordenação de eventos históricos.
+3. **ID do Dispositivo (Inteiro):** Identificador único, numérico e sequencial. É preenchido com `0` antes do registro e assume o valor definitivo após a atribuição pelo servidor.
 4. **Carga Útil (*Payload* - Variável):** O restante dos bytes carrega a informação específica daquela mensagem (ex: o valor lido por um sensor ou o comando para uma lâmpada).
 
 ---
@@ -211,7 +211,9 @@ O teste será feito com o novo dispositivo de Ar-Condicionado.
 4. **Observação de Logs (Servidor):** Verifique no terminal do servidor a impressão dos logs obrigatórios confirmando o registro:
    * `Dispositivo do tipo Ar-Condicionado (A) registrado`
    * `Ambiente selecionado = [1] Sala`
+     
 Log servidor:
+
 <img width="990" height="336" alt="image" src="https://github.com/user-attachments/assets/9ba3c2f8-f19c-43c0-8c94-ce9a34288201" />
 
 Log cliente: 
@@ -233,7 +235,9 @@ Os sensores simulam a interação do mundo físico capturando dados do teclado e
    * Repare no terminal do **Ar-Condicionado** (aberto no passo 4.2). Ele receberá a mensagem instantaneamente do servidor e exibirá na tela o acionamento: `AR-CONDICIONADO: SET 23°C`.
 
 - sensor de temperatura
+  
    <img width="540" height="408" alt="image" src="https://github.com/user-attachments/assets/1d2b4b16-e50c-470f-b6cc-c0310b26494f" />
+   
 ```
   Temperatura lida no sensor: 28
 Meu ID=2
@@ -244,13 +248,14 @@ Aguardando confirmação...
 retornando mensagem codigo> 1
 Leitura recebida pelo servidor!!!
 ```
+
 - Atuador ar condicionado
 
   <img width="665" height="385" alt="image" src="https://github.com/user-attachments/assets/5e599a1c-9c38-4682-afa5-d770a6b4f918" />
 
 - servidor
 
-  ```
+```
   Ar-Condicionado1: Ar-condicionado SET 23 graus
 Enviando mensagem: >>> Aguardando mensagem 
 ('127.0.0.1', 57845)
@@ -263,38 +268,36 @@ Aguardando evento, atuador 1
 ```
 
 
-
-
 ---
 
 ### 4.4. Teste de Falha: Dispositivo Não Suportado
-O servidor possui um mecanismo de defesa caso um dispositivo tente se conectar com um código não cadastrado no arquivo `dispositivos.txt`[cite: 21, 22]. 
+O servidor possui um mecanismo de defesa caso um dispositivo tente se conectar com um código não cadastrado no arquivo `dispositivos.txt`. 
+Esta teste simula um atacante que tenta se passar por um dispositivo autentico cadastrado.
 
 * **Como simular:** Altere temporariamente o código fonte de um cliente (ex: `Cliente_Lampada.py`) mudando a constante de inicialização para um número inexistente, como `99` (ex: `device = Device(connection, 99)`).
 * **Comportamento Esperado:**
   1. Ao iniciar este cliente adulterado, ele envia a solicitação de registro.
   2. O servidor consulta o dicionário de tipos (`GetTypeItem`) e não encontra a chave `99`.
-  3. O servidor responde com o código de erro `ERRO_DISPOSITIVO_NAO_SUPORTADO` (código 5)[cite: 20].
-  4. **Observação de Logs (Servidor):** O servidor imprime no terminal: `Dispositivo não suportado código=(99)` e encerra a conexão do socket imediatamente de forma segura, retornando ao estado de Desconectar (`SM_DESCONECTAR`)[cite: 20, 22].
+  3. O servidor responde com o código de erro `ERRO_DISPOSITIVO_NAO_SUPORTADO` (código 5).
+  4. **Observação de Logs (Servidor):** O servidor imprime no terminal: `Dispositivo não suportado código=(99)` e encerra a conexão do socket imediatamente de forma segura, retornando ao estado de Desconectar (`SM_DESCONECTAR`).
 
-> 📸 **[COLOQUE AQUI O PRINTSCREEN DO LOG DO SERVIDOR REJEITANDO A CONEXÃO COM A MENSAGEM DE 'DISPOSITIVO NÃO SUPORTADO']**
+<img width="923" height="279" alt="image" src="https://github.com/user-attachments/assets/5e3789f3-140b-44ec-b1f0-f7218744ca1b" />
 
+```
+Mensagem recebida:  ('127.0.0.1', 57715) [09/10/2026, 22:26:45] 2: Registro, Tipo de dispositivo: 99
+Enviando mensagem:  ('127.0.0.1', 57715)
+None0: Dispositivo não suportado código=({deviceType})
+Desconectado: ('127.0.0.1', 57715)
+```
+
+
+### 4.5. Caso seja informado ambiente não cadastrado o sistema informa como ambiente inválido.
+
+<img width="745" height="126" alt="image" src="https://github.com/user-attachments/assets/ce489c61-a658-4bb8-92b6-509c3cb21c52" />
 
 ---
 ## 5. Análise Crítica e Melhorias Implementadas
 
-Durante a apropriação e extensão deste sistema legado de *Smart Home*, foi possível identificar oportunidades de correção e melhorias arquiteturais, bem como apontar limitações que podem ser abordadas em versões futuras.
-
-### 5.1. Correções Realizadas no Código Original (Bugs Fixes)
-* **Correção de Chamada de Função (`NameError`):** No arquivo original `DeviceThread.py`, o tratamento de erros (como em cenários de ID de dispositivo inválido ou ambiente incorreto) tentava chamar a função `sendMessage()` com a letra "s" minúscula[cite: 9]. Isso gerava uma exceção que travava a thread do servidor e desconectava o cliente abruptamente. O código foi corrigido para a chamada correta `SendMessage()`.
-* **Tratamento do Valor Inicial do Atuador:** O estado inicial dos dispositivos (`device.value`) foi reajustado. Na versão original, um atuador inicializado com valor `0` poderia ignorar um primeiro comando de desligamento (valor `0`) oriundo da fila devido a uma checagem de diferença de estado.
-
-### 5.2. Melhorias na Extensão do Sistema (Ar-Condicionado)
-* **Escalabilidade via Reaproveitamento de Filas:** Para integrar o Ar-Condicionado inteligente sem quebrar ou precisar reescrever a complexa Thread de Controle Geral (`GeneralControl.py`), o novo dispositivo utilizou a infraestrutura de filas dos atuadores originais. O Ar-Condicionado entra no dicionário de filas sendo roteado de forma transparente, provando a robustez da arquitetura orientada a mensagens assíncronas (`queue.Queue`).
-* **Automação Desacoplada:** A regra de negócio ($\ge 26^\circ\text{C}$ dispara $23^\circ\text{C}$) não bloqueia a comunicação da rede. A lógica foi embutida no recebimento da leitura do termômetro, injetando o comando na Fila Central para que a *Thread* de Controle Geral faça o roteamento até o atuador correspondente no mesmo cômodo.
-
-### 5.3. Análise Crítica e Trabalhos Futuros (Limitações)
-Embora funcional, o sistema apresenta pontos de melhoria importantes considerando o contexto de IoT (*Internet of Things*):
-1. **Regras de Automação Estáticas (*Hardcoded*):** A condição térmica para ativar o ar-condicionado está escrita diretamente no código da thread. Um aprimoramento ideal seria criar um motor de regras lendo um arquivo de configuração (ex: JSON ou XML), permitindo que o usuário altere gatilhos sem precisar recompilar ou reiniciar o servidor.
-2. **Segurança de Rede:** A comunicação ocorre via *sockets* TCP sem criptografia (texto claro empacotado em bytes). Em um ambiente de rede real, um atacante na mesma rede Wi-Fi poderia facilmente interceptar os pacotes ou injetar comandos falsos. A implementação de **TLS/SSL** seria necessária para segurança.
-3. **Persistência de Dados e Histórico:** Conforme sugerido nos comentários internos do próprio código base original, as leituras dos sensores são atualmente voláteis[cite: 9]. Integrar um banco de dados leve (como SQLite) para persistir o histórico de acionamentos e leituras é um passo essencial para transformar este protótipo em uma solução comercial.
+* Reconstrução dos fluxogramas para melhor visualição
+* Acerto das estrutura do fstring que estava ausente em muitos prints, produzindo assim a impressão do texto em vez das variáveis.
+* Normalização da inconsistência da palavra send, encontrada em algun lugares com s maiusculo e em outros minusculo.
