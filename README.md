@@ -32,6 +32,7 @@ Profa. Dra Cristina Klippel Dominicini
 O sistema emprega a arquitetura orientada a conexão do protocolo TCP (Transmission Control Protocol) sobre a camada de transporte, utilizando sockets em Python para gerenciar a comunicação entre a central (servidor) e os dispositivos inteligentes da residência.
 
 O Conceito de Sockets TCP no Sistema
+
 Um socket TCP atua como um ponto de comunicação bidirecional desta forma estabelece um canal lógico confiável entre o servidor e cada cliente (Lâmpada, Sensor de Presença, Termômetro ou Ar-Condicionado). Como o TCP opera orientado a fluxos de bytes, ele assegura que todos os pacotes sejam entregues na ordem correta, sem perdas e sem duplicações, gerando um circuito virtual estável para a troca de comandos na infraestrutura desse projeto.
 
 ### O Funcionamento do Buffer TCP e o Descompasso entre send() e recv()
@@ -59,7 +60,7 @@ Ele só mexe nos dados e deixa o programa avançar de estado quando tem certeza 
 
 O sistema adota uma arquitetura **Cliente/Servidor Multithread**, onde a central de controle gerencia conexões TCP simultâneas e o estado de múltiplos ambientes residenciais de forma concorrente. 
 
-Abaixo detalhamos o papel de cada thread e como ocorre a troca de mensagens utilizando filas (queues).
+Abaixo o papel de cada thread e como ocorre a troca de mensagens utilizando filas (queues).
 
 ### 2.1. Visão Geral das Threads
 O servidor central gerencia diferentes tipos de threads para não bloquear a execução enquanto atende múltiplos clientes.
@@ -168,25 +169,20 @@ Sempre que um novo cliente se conecta (ex: Ar-Condicionado), a seguinte sequênc
 
 #### Fase 2: Operação Contínua (Exemplos de Ações)
 
-* **Exemplo A: Acendendo uma Lâmpada (Comando do Servidor)**
-  * **Servidor envia:** `MSG_LAMPADA` (Código `6`) contendo a **Ação `1`** (Ligar).
-  * **Cliente Lâmpada recebe:** Processa a ação, imprime na tela `LAMPADA LIGADA` e retorna a confirmação.
-  * **Cliente responde:** `MSG_STATUS` (Código `1`) contendo o status **`3`** (`ACAO_EXECUTADA`).
-
-* **Exemplo B: Climatização do Ar-Condicionado (Comando do Servidor)**
-  * **Servidor envia:** `MSG_LAMPADA` (Código `6`) contendo a **Ação `23`**.
+* **Exemplo A: Climatização do Ar-Condicionado (Comando do Servidor)**
+  * **Servidor envia:** `MSG_ATUADOR` (Código `6`) contendo a **Ação `23`**.
   * **Cliente Ar-Condicionado recebe:** Ajusta a temperatura na tela para `SET 23°C` e retorna a confirmação.
   * **Cliente responde:** `MSG_STATUS` (Código `1`) contendo o status **`3`** (`ACAO_EXECUTADA`).
 
-* **Exemplo C: Envio de Leitura de Temperatura (Comando do Cliente)**
+* **Exemplo B: Envio de Leitura de Temperatura (Comando do Cliente)**
   * **Cliente Termômetro envia:** `MSG_SENSOR` (Código `5`) contendo o valor numérico lido **`26.0`**.
   * **Servidor recebe:** Processa a automação térmica na fila e devolve o recibo.
   * **Servidor responde:** `MSG_STATUS` (Código `1`) contendo o status **`2`** (`LEITURA_RECEBIDA`).
 ---
 ## 4. Roteiro Detalhado de Testes
 
-Para validar a arquitetura Cliente/Servidor, a troca de mensagens TCP e as regras de negócio de automação residencial, siga o roteiro de testes abaixo. É necessário abrir múltiplos terminais simultaneamente.
-OOs comandos exibidos são de um terminal linux, mas o sistema pode ser executado de qualquer IDE.
+Para validar a arquitetura Cliente/Servidor, a troca de mensagens TCP e as regras de comunicação, siga o roteiro de testes abaixo. É necessário abrir múltiplos terminais simultaneamente.
+Os comandos exibidos são de um terminal linux, mas o sistema pode ser executado de qualquer IDE.
 
 ### 4.1. Inicializando o Servidor
 O servidor atua como a central inteligente da casa e deve ser o primeiro a ser iniciado. 
@@ -196,7 +192,7 @@ O servidor atua como a central inteligente da casa e deve ser o primeiro a ser i
 3. **Observação de Logs:** O terminal do servidor exibirá a mensagem informando que a Thread de Controle Geral foi iniciada e que o sistema está aguardando conexões na porta 5000.
 4. A Lista de dispositivos e ambiente é exibida.
 
-<img width="806" height="342" alt="image" src="https://github.com/user-attachments/assets/cbf68fce-74df-40db-943e-0367a2554c71" />
+<img width="600" height="240" alt="image" src="https://github.com/user-attachments/assets/cbf68fce-74df-40db-943e-0367a2554c71" />
 
 ---
 
@@ -216,11 +212,11 @@ O teste será feito com o novo dispositivo de Ar-Condicionado.
      
 Log servidor:
 
-<img width="990" height="336" alt="image" src="https://github.com/user-attachments/assets/9ba3c2f8-f19c-43c0-8c94-ce9a34288201" />
+<img width="600" height="240" alt="image" src="https://github.com/user-attachments/assets/9ba3c2f8-f19c-43c0-8c94-ce9a34288201" />
 
 Log cliente: 
 
-<img width="1146" height="421" alt="image" src="https://github.com/user-attachments/assets/37c1e8cb-551e-40da-acf2-539a142a10cc" />
+<img width="800" height="320" alt="image" src="https://github.com/user-attachments/assets/37c1e8cb-551e-40da-acf2-539a142a10cc" />
 
 
 
@@ -238,7 +234,7 @@ Os sensores simulam a interação do mundo físico capturando dados do teclado e
 
 - sensor de temperatura
   
-   <img width="540" height="408" alt="image" src="https://github.com/user-attachments/assets/1d2b4b16-e50c-470f-b6cc-c0310b26494f" />
+   <img width="440" height="320" alt="image" src="https://github.com/user-attachments/assets/1d2b4b16-e50c-470f-b6cc-c0310b26494f" />
    
 ```
   Temperatura lida no sensor: 28
@@ -253,7 +249,7 @@ Leitura recebida pelo servidor!!!
 
 - Atuador ar condicionado
 
-  <img width="665" height="385" alt="image" src="https://github.com/user-attachments/assets/5e599a1c-9c38-4682-afa5-d770a6b4f918" />
+  <img width="580" height="300" alt="image" src="https://github.com/user-attachments/assets/5e599a1c-9c38-4682-afa5-d770a6b4f918" />
 
 - servidor
 
@@ -283,7 +279,7 @@ Esta teste simula um atacante que tenta se passar por um dispositivo autentico c
   3. O servidor responde com o código de erro `ERRO_DISPOSITIVO_NAO_SUPORTADO` (código 5).
   4. **Observação de Logs (Servidor):** O servidor imprime no terminal: `Dispositivo não suportado código=(99)` e encerra a conexão do socket imediatamente de forma segura, retornando ao estado de Desconectar (`SM_DESCONECTAR`).
 
-<img width="923" height="279" alt="image" src="https://github.com/user-attachments/assets/5e3789f3-140b-44ec-b1f0-f7218744ca1b" />
+<img width="600" height="200" alt="image" src="https://github.com/user-attachments/assets/5e3789f3-140b-44ec-b1f0-f7218744ca1b" />
 
 ```
 Mensagem recebida:  ('127.0.0.1', 57715) [09/10/2026, 22:26:45] 2: Registro, Tipo de dispositivo: 99
@@ -295,11 +291,12 @@ Desconectado: ('127.0.0.1', 57715)
 
 ### 4.5. Caso seja informado ambiente não cadastrado o sistema informa como ambiente inválido.
 
-<img width="745" height="126" alt="image" src="https://github.com/user-attachments/assets/ce489c61-a658-4bb8-92b6-509c3cb21c52" />
+<img width="600" height="126" alt="image" src="https://github.com/user-attachments/assets/ce489c61-a658-4bb8-92b6-509c3cb21c52" />
 
 ---
 ## 5. Análise Crítica e Melhorias Implementadas
 
 * Reconstrução dos fluxogramas para melhor visualição
 * Acerto das estrutura do fstring que estava ausente em muitos prints, produzindo assim a impressão do texto em vez das variáveis.
-* Normalização da inconsistência da palavra send, encontrada em algun lugares com s maiusculo e em outros minusculo.
+* Normalização da inconsistência encontradas nos códigos.
+* Construção de atuador ar-condicionado, com set de temperatura aos 23 graus para acionamento acima de 26 graus.
